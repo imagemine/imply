@@ -139,8 +139,8 @@ exec:
   command:
     - /bin/sh
     - -c
-    - /root/check-health -c "{{ .Values.agents.clusterName }}" {{ ternary "" "-s" (empty .Values.security.tls) }}
-failureThreshold: 30
+    - /root/readiness-check
+failureThreshold: 90
 periodSeconds: 10
 {{- end -}}
 
@@ -149,7 +149,7 @@ exec:
   command:
     - /bin/sh
     - -c
-    - /root/check-health -c "{{ .Values.agents.clusterName }}" {{ ternary "" "-s" (empty .Values.security.tls) }}
+    - /root/readiness-check
 periodSeconds: 1
 initialDelaySeconds: 5
 {{- end -}}

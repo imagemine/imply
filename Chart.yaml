@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: "2022.07"
+appVersion: 2022.09.1
 dependencies:
 - condition: deployments.zookeeper
   name: zookeeper
@@ -24,4 +24,4 @@ maintainers:
 - email: contact@imply.io
   name: Imply
 name: imply
-version: "2022.07"
+version: 2022.09.1
