@@ -139,6 +139,16 @@ spec:
               name: scripts
               subPath: {{ base $path }}
           {{- end }}
+          {{- if .Files.Glob "scripts/run-druid" }}
+            - mountPath: /run-druid
+              name: scripts
+              subPath: run-druid
+          {{- end }}
+          {{- if .Files.Glob "scripts/handle-coredump" }}
+            - mountPath: /handle-coredump
+              name: scripts
+              subPath: handle-coredump
+          {{- end }}
           {{- if .Values.security.tls }}
             - mountPath: "/etc/imply/ca"
               name: ca-secrets
@@ -205,6 +215,18 @@ spec:
     {{- with .dataTierValues.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- if .dataTierValues.topologySpreadConstraints }}
+      topologySpreadConstraints:
+      {{- range $constraint := .dataTierValues.topologySpreadConstraints }}
+      - {{ $constraint | toYaml | indent 8 | trim }}
+        {{ if not $constraint.labelSelector -}}
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: {{ $.dataTierName }}
+            app.kubernetes.io/instance: {{ $.Release.Name }}
+        {{- end }}
+      {{- end }}
     {{- end }}
   volumeClaimTemplates:
 {{- if .dataTierValues.persistence.enabled }}

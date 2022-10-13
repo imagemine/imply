@@ -99,6 +99,16 @@ spec:
               name: scripts
               subPath: {{ base $path }}
           {{- end }}
+          {{- if .Files.Glob "scripts/run-druid" }}
+            - mountPath: /run-druid
+              name: scripts
+              subPath: run-druid
+          {{- end }}
+          {{- if .Files.Glob "scripts/handle-coredump" }}
+            - mountPath: /handle-coredump
+              name: scripts
+              subPath: handle-coredump
+          {{- end }}
           {{- if .Values.security.tls }}
             - mountPath: "/etc/imply/ca"
               name: ca-secrets
@@ -158,5 +168,17 @@ spec:
     {{- with .Values.master.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- if .Values.master.topologySpreadConstraints }}
+      topologySpreadConstraints:
+      {{- range $constraint := .Values.master.topologySpreadConstraints }}
+      - {{ $constraint | toYaml | indent 8 | trim }}
+        {{ if not $constraint.labelSelector -}}
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: {{ include "imply.master.name" $ }}
+            app.kubernetes.io/instance: {{ $.Release.Name }}
+        {{- end }}
+      {{- end }}
     {{- end }}
 {{- end }}

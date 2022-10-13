@@ -1,5 +1,16 @@
 #!/bin/bash -u
 
+getAvailabilityZone() {
+  local PARAMS=(-sSLf --retry 2 --retry-connrefused)
+  local TOKEN
+
+  if ! TOKEN="$(curl "${PARAMS[@]}" -X PUT 'http://instance-data/latest/api/token' -H 'X-aws-ec2-metadata-token-ttl-seconds: 21600')"; then
+    return 5
+  fi
+
+  curl "${PARAMS[@]}" -H "X-aws-ec2-metadata-token: $TOKEN" http://instance-data/latest/meta-data/placement/availability-zone
+}
+
 writeConfigServerRequestPayload() {
   mkdir -p "$(dirname "$CONFIG_SERVER_REQUEST_PAYLOAD_PATH")"
 
@@ -39,6 +50,12 @@ EOT
   if [ -n "${IMPLY_CONFIG_VERSION:-}" ]; then
     local contents
     contents="$(jq --argjson version "$IMPLY_CONFIG_VERSION" '.configVersion = $version' "$CONFIG_SERVER_REQUEST_PAYLOAD_PATH")"
+    echo -E "${contents}" > "$CONFIG_SERVER_REQUEST_PAYLOAD_PATH"
+  fi
+
+  if AZ=$(getAvailabilityZone); then
+    local contents
+    contents="$(jq --arg zone "$AZ" '.availabilityZone = $zone' "$CONFIG_SERVER_REQUEST_PAYLOAD_PATH")"
     echo -E "${contents}" > "$CONFIG_SERVER_REQUEST_PAYLOAD_PATH"
   fi
 }

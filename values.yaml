@@ -4,7 +4,7 @@ fullnameOverride:
 images:
   manager:
     repository: imply/manager
-    tag: "2022.07"
+    tag: "2022.09.1"
   agent:
     repository: imply/agent
     tag: "v11"
@@ -423,6 +423,7 @@ mysql:
   persistence:
     enabled: true
   mysqlRootPassword: imply
+  imageTag: "5.7.39"
 
 # ------------------------------------------------------------------------------
 # MinIO
